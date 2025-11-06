@@ -1,0 +1,51 @@
+body {
+    font-family: Vazirmatn, sans-serif;
+}
+
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+@keyframes pulse-slow-intro {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+.animate-pulse-slow-intro {
+  animation: pulse-slow-intro 2.5s ease-in-out infinite;
+  animation-delay: 0.5s; /* کمی تأخیر */
+}
+
+
+@keyframes scale-bounce-in {
+  0% { transform: scale(0); opacity: 0; }
+  40% { transform: scale(1.2); opacity: 1; }
+  60% { transform: scale(0.9); }
+  80% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-scale-bounce-in {
+  animation: scale-bounce-in 1.5s ease-out forwards;
+  animation-delay: 0.7s; /* تأخیر برای ظاهر شدن بعد از پالس */
+}
+
+
+@keyframes fade-slide-in-intro {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.animate-fade-slide-in-intro {
+  animation: fade-slide-in-intro 1s ease-out forwards;
+  animation-delay: 2s; /* تأخیر برای ظاهر شدن متن بعد از لوگو */
+}
