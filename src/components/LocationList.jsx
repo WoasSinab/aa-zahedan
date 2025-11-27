@@ -20,7 +20,7 @@ const LocationList = ({ locations, cityName }) => {
     }
 
     return (
-        <section className="my-6">
+        <section className="my-20">
             <h3 className="text-2xl font-black text-gray-800 mb-6 border-b-2 pb-1 flex justify-end">
                 گروه‌های فعال در {cityName} ({locations.length} گروه)
             </h3>
