@@ -1,9 +1,10 @@
-// src/components/LiveSessionTracker.jsx - اصلاح RTL و ریسپانسیو بودن
+// src/components/LiveSessionTracker.jsx - اصلاح نمایش لیست جلسات تمام شده
 
 import React, { useState, useEffect } from 'react';
 import { ALL_LOCATIONS, DAY_NAMES } from '../js/location.js';
 import { getSessionStatus, formatTimeDifference } from '../utils/timeUtils';
-import { FaClock, FaCheckCircle, FaRunning, FaChevronRight } from 'react-icons/fa'; // FaChevronRight برای RTL
+// استفاده از FaChevronDown برای نمایش وضعیت باز و بسته شدن
+import { FaClock, FaCheckCircle, FaRunning, FaChevronDown } from 'react-icons/fa'; 
 
 // تعداد جلسات آینده برای نمایش
 const MAX_UPCOMING_SESSIONS = 3;
@@ -12,25 +13,27 @@ const MAX_UPCOMING_SESSIONS = 3;
 const SessionCard = ({ session, status }) => {
     const { timeDiff, effectiveStart, effectiveEnd } = session;
 
-    let cardClasses = "p-3 rounded-lg shadow-md mb-3 flex gap-12 items-center justify-between transition-colors";
+    let cardClasses = "p-3 rounded-lg shadow-md mb-3 flex items-center justify-between transition-colors gap-6";
     let icon;
     let timeText;
     
     switch (status) {
         case 'LIVE':
             cardClasses += " bg-red-100 border-r-4 border-red-600 animate-pulse";
-            icon = <FaRunning className="w-5 h-5 text-red-600 mr-3" />; // 💡 mr-3
+            icon = <FaRunning className="w-5 h-5 text-red-600 mr-3" />;
+            // نمایش زمان پایان به جای زمان باقی‌مانده (برای سادگی)
             timeText = `پایان: ${effectiveEnd.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}`;
             break;
         case 'UPCOMING':
-            cardClasses += " bg-green-100 border-r-4 border-green-600 ";
-            icon = <FaClock className="w-5 h-5 text-green-600 mr-3" />; // 💡 mr-3
-            timeText = ` شروع در ${formatTimeDifference(timeDiff)}`;
+            cardClasses += " bg-green-100 border-r-4 border-green-600";
+            icon = <FaClock className="w-5 h-5 text-green-600 mr-3" />;
+            timeText = `شروع در ${formatTimeDifference(timeDiff)}`;
             break;
         case 'COMPLETED':
             cardClasses += " bg-gray-100 border-r-4 border-gray-400 opacity-75";
-            icon = <FaCheckCircle className="w-5 h-5 text-gray-500 mr-3" />; // 💡 mr-3
-            timeText = 'امروز به پایان رسید';
+            icon = <FaCheckCircle className="w-5 h-5 text-gray-500 mr-3" />;
+            // نمایش زمان پایان جلسه تمام شده
+            timeText = `ساعت پایان: ${effectiveEnd.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}`;
             break;
         default:
             return null;
@@ -39,11 +42,11 @@ const SessionCard = ({ session, status }) => {
     return (
         <div className={cardClasses}>
             {icon}
-            <div className="flex-grow text-right"> {/* 💡 text-right */}
+            <div className="flex-grow text-right">
                 <p className="font-extrabold text-sm text-gray-800">{session.name} ({session.cityName})</p>
-                <p className="text-xs text-gray-600 mt-0.5">ساعت: {effectiveStart.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</p>
+                <p className="text-xs text-gray-600 mt-0.5">ساعت شروع: {effectiveStart.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
-            <div className="text-left font-bold text-xs text-gray-700"> {/* 💡 text-left برای نمایش زمان انگلیسی */}
+            <div className="text-left font-bold text-xs text-gray-700 flex-shrink-0">
                 {timeText}
             </div>
         </div>
@@ -53,6 +56,8 @@ const SessionCard = ({ session, status }) => {
 
 const LiveSessionTracker = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
+    // 💡 وضعیت جدید: برای کنترل نمایش لیست جلسات تمام شده
+    const [showCompleted, setShowCompleted] = useState(false); 
 
     useEffect(() => {
         const timerId = setInterval(() => {
@@ -62,6 +67,7 @@ const LiveSessionTracker = () => {
         return () => clearInterval(timerId);
     }, []);
 
+    // 1. محاسبه وضعیت تمام جلسات امروز
     const todaySessions = ALL_LOCATIONS
         .map(loc => ({
             ...loc,
@@ -70,10 +76,14 @@ const LiveSessionTracker = () => {
         .filter(session => session.status !== 'NONE')
         .sort((a, b) => a.effectiveStart.getTime() - b.effectiveStart.getTime()); 
 
+    // 2. فیلتر کردن بر اساس وضعیت
     const liveSessions = todaySessions.filter(s => s.status === 'LIVE');
     const upcomingSessions = todaySessions.filter(s => s.status === 'UPCOMING').slice(0, MAX_UPCOMING_SESSIONS);
-    const completedSessionsCount = todaySessions.filter(s => s.status === 'COMPLETED').length;
+    // 💡 لیست کامل جلسات تمام شده
+    const completedSessions = todaySessions.filter(s => s.status === 'COMPLETED');
+    const completedSessionsCount = completedSessions.length;
 
+    // عنوان روز امروز
     const todayDayKey = currentTime.toLocaleDateString('en-US', { weekday: 'short' });
     const persianDayName = DAY_NAMES[todayDayKey];
 
@@ -86,9 +96,9 @@ const LiveSessionTracker = () => {
     }
     
     return (
-        <section className="my-6 mb-20 p-4 bg-white rounded-xl shadow-2xl border-t-8 border-indigo-500 text-right"> {/* 💡 text-right */}
-            <h3 className="text-2xl font-black text-indigo-700 my-6 mb-12 flex gap-4 items-center justify-end"> {/* 💡 justify-end */}
-                <span className='ml-2'>ردیابی جلسات امروز ({persianDayName})</span> {/* 💡 ml-2 */}
+        <section className="my-6 p-4 bg-white rounded-xl shadow-2xl border-t-8 border-indigo-500 text-right">
+            <h3 className="text-2xl font-black text-indigo-700 mb-4 flex items-center justify-end">
+                <span className='ml-2 my-6'>ردیابی جلسات امروز ({persianDayName})</span>
                 <FaClock className="w-6 h-6" />
             </h3>
             
@@ -112,14 +122,29 @@ const LiveSessionTracker = () => {
                 </div>
             )}
 
-            {/* 3. جلسات تمام شده */}
+            {/* 3. جلسات تمام شده (بخش قابل باز و بسته شدن) */}
             {completedSessionsCount > 0 && (
-                <div className="mt-4 flex justify-between items-center text-gray-500">
-                    {/* 💡 تغییر چینش متن و آیکون */}
-                    <FaChevronRight className="w-4 h-4" /> {/* 💡 FaChevronRight برای RTL */}
-                    <p className="font-semibold text-sm">
-                        {completedSessionsCount} جلسه امروز به پایان رسیده است.
-                    </p>
+                <div className="mt-4">
+                    {/* 💡 تبدیل نمایش به دکمه برای باز و بسته شدن */}
+                    <button 
+                        onClick={() => setShowCompleted(!showCompleted)} 
+                        className="gap-4 w-full flex justify-end items-center text-gray-500 hover:text-gray-700 transition-colors p-2 -mx-2 rounded-lg hover:bg-gray-100"
+                    >
+                        <p className="font-semibold text-sm">
+                            {completedSessionsCount}  لیست جلسات به پایان رسیده - تعداد
+                        </p>
+                        {/* 💡 تغییر آیکون بر اساس وضعیت باز و بسته شدن */}
+                        <FaChevronDown className={`w-4 h-4 transition-transform ${showCompleted ? 'rotate-180' : 'rotate-0'}`} />
+                    </button>
+
+                    {/* 💡 نمایش لیست کامل جلسات تمام شده */}
+                    {showCompleted && (
+                        <div className="mt-2 pt-2 border-t border-gray-200">
+                            {completedSessions.map(s => (
+                                <SessionCard key={s.id} session={s} status="COMPLETED" />
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
             
@@ -127,11 +152,10 @@ const LiveSessionTracker = () => {
             {liveSessions.length === 0 && upcomingSessions.length === 0 && completedSessionsCount > 0 && (
                 <div className="mt-4 text-center p-2 bg-gray-50 rounded-lg">
                     <p className="text-gray-600 font-semibold">
-                        تمام جلسات امروز به پایان رسیده‌اند.
+                        تمام جلسات مهم امروز نمایش داده شده‌اند. برای مشاهده لیست کامل، بخش "جلسات تمام شده" را باز کنید.
                     </p>
                 </div>
             )}
-
         </section>
     );
 };
