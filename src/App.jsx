@@ -6,6 +6,7 @@ import Header from './components/Header';
 import CitySwitch from './components/CitySwitch';
 import LocationList from './components/LocationList';
 import LiveSessionTracker from './components/LiveSessionTracker'; // 💡 ایمپورت جدید
+import Footer from './components/Footer'
 
 function App() {
   // زاهدان به عنوان شهر پیش فرض انتخاب شده است
@@ -43,7 +44,10 @@ function App() {
           cityName={currentCityData.name} 
         />
         
+
       </main>
+
+      <Footer />
     </div>
   );
 }
