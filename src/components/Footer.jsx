@@ -9,11 +9,11 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         
         <p className="text-sm text-gray-600 font-medium">
-          طراحی و توسعه برای جامعه AA
+          شورای ناحیه ۱۱ ایران
         </p>
         
         <p className="text-xs text-gray-500 mt-1">
-          اطلاعات مکان‌ها بر اساس داده‌های عمومی نشان (Neshan)
+          اطلاعات مکان‌ها بر اساس داده‌های عمومی نشان
         </p>
       </div>
     </footer>

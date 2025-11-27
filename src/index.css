@@ -49,3 +49,27 @@ body {
   animation: fade-slide-in-intro 1s ease-out forwards;
   animation-delay: 2s; /* تأخیر برای ظاهر شدن متن بعد از لوگو */
 }
+
+
+/* تعریف انیمیشن چرخشی استروک */
+@keyframes spin-stroke {
+  0% { 
+    transform: rotate(0deg); 
+    stroke-dashoffset: 200; /* شروع از انتهای خط */
+  }
+  50% {
+    stroke-dashoffset: 0; /* پر شدن خط */
+  }
+  100% { 
+    transform: rotate(360deg); /* چرخش کامل */
+    stroke-dashoffset: 200; /* بازگشت به شروع (باعث ایجاد حرکت بی‌نهایت می‌شود) */
+  }
+}
+
+/* اعمال انیمیشن بر روی SVG */
+.animate-spin-stroke {
+  animation: spin-stroke 4s linear infinite;
+  /* تنظیمات اولیه برای dasharray و dashoffset */
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+}

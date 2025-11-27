@@ -1,78 +1,92 @@
-// src/components/LocationItem.jsx - به‌روزرسانی نهایی برای راست‌چین و جابجایی فلش
+// src/components/LocationItem.jsx - اصلاح RTL و فواصل آیکون‌ها
 
 import React from 'react';
+import { FaMapMarkerAlt, FaRegClock, FaRegCalendarAlt } from 'react-icons/fa'; 
+import { getEffectiveTime, formatDaysToPersian } from '../utils/timeUtils'; 
 
-const LocationItem = ({ location, isSelected, onToggle }) => {
-  
-  const buttonClasses = `
-    // w-full و پدینگ باقی می‌ماند
-    w-full p-4 rounded-xl transition duration-300 
-    // 💡 تغییر کلیدی: flex-row-reverse برای جابجایی فلش به سمت چپ
-    flex flex-row-reverse justify-between items-center 
-    font-extrabold text-sm md:text-base focus:outline-none focus:ring-4 focus:ring-opacity-50 shadow-md hover:shadow-lg
-    ${isSelected
-      ? 'bg-indigo-600 text-white focus:ring-indigo-400' 
-      : 'bg-white hover:bg-indigo-50 text-gray-800 focus:ring-indigo-300'
+// کامپوننت داخلی برای نمایش جزئیات زمان‌بندی
+const SessionDetails = ({ location }) => {
+    const daysString = formatDaysToPersian(location.days);
+    const { startTime, endTime, note } = getEffectiveTime(location);
+
+    let timeTitle = 'ساعت برگزاری:';
+    if (location.seasonalTimes) {
+        timeTitle = 'ساعت (فصلی):';
+    } else if (location.specialTimes) {
+        timeTitle = 'ساعت (با زمان‌های خاص):';
     }
-  `;
 
-  const arrowClasses = `
-    w-5 h-5 transition-transform duration-300 
-    ${isSelected ? 'rotate-180 text-white' : 'rotate-0 text-gray-500'}
-  `;
-  
-  const contentClasses = `
-    mt-2 overflow-hidden transition-all duration-500 ease-in-out
-    ${isSelected ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
-  `;
+    return (
+        <div className="mt-2 text-gray-700 text-sm">
+            
+            {/* روزهای برگزاری */}
+            <div className="flex justify-end mb-1 text-sm">
+                {/* 💡 آیکون در سمت راست (mr-2) */}
+                <FaRegCalendarAlt className="w-4 h-4 text-indigo-500 flex-shrink-0 mt-0.5 mr-2" /> 
+                <p className="font-semibold text-gray-800 mr-1">
+                    روزهای برگزاری: 
+                    <span className="font-normal mr-1">{daysString}</span>
+                </p>
+            </div>
 
-  return (
-    <li className="py-2 border-b border-gray-100 last:border-b-0">
-      
-      <button
-        onClick={() => onToggle(location.id)}
-        className={buttonClasses}
-      >
-        {/* 1. نام گروه: در سمت راست قرار می‌گیرد */}
-        <span className="text-right flex-grow pr-2"> 
-            {location.name}
-        </span>
-
-        {/* 2. آیکون فلش: به دلیل flex-row-reverse در سمت چپ قرار می‌گیرد */}
-        <svg 
-          className={arrowClasses} 
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {/* قسمت نمایش جزئیات */}
-      <div className={contentClasses}>
-        {/* 💡 text-right برای راست‌چین کردن محتوای داخلی */}
-        <div className="p-4 bg-indigo-50 rounded-b-xl border border-indigo-200 border-t-0 shadow-inner text-right">
-          
-          <p className="text-xs font-semibold text-indigo-700 mb-1">
-            **آدرس محل برگزاری:**
-          </p>
-          {/* 💡 text-right برای راست‌چین کردن متن آدرس */}
-          <p className="text-sm text-gray-800 mb-4 leading-6 text-right"> 
-            {location.address}
-          </p>
-          
-          {/* دکمه مشاهده در نشان - همچنان وسط چین می‌ماند */}
-          <a 
-            href={location.url} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="block w-full text-center px-4 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 transition duration-200 font-bold text-sm shadow-md"
-          >
-            مشاهده موقعیت دقیق در نقشه نشان
-          </a>
-          
+            {/* ساعت برگزاری */}
+            <div className="flex justify-end text-sm">
+                {/* 💡 آیکون در سمت راست (mr-2) */}
+                <FaRegClock className="w-4 h-4 text-indigo-500 flex-shrink-0 mt-0.5 mr-2" /> 
+                <p className="font-semibold text-gray-800 mr-1">
+                    {timeTitle}
+                    <span className="font-normal mr-1">
+                        {startTime} تا {endTime}
+                        {note && <span className="text-xs text-gray-500">{note}</span>}
+                    </span>
+                </p>
+            </div>
+            
         </div>
+    );
+};
+
+// کامپوننت اصلی LocationItem
+const LocationItem = ({ location }) => {
+  return (
+    <div className="bg-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border-r-4 border-indigo-500">
+      
+      {/* عنوان گروه */}
+      <h2 className="text-lg font-extrabold text-gray-800 mb-2 border-b pb-1 text-right">
+        {location.name}
+      </h2>
+
+      {/* روزها و ساعت‌ها */}
+      {(location.days && location.startTime && location.endTime) && (
+          <SessionDetails location={location} />
+      )}
+
+      {/* آدرس */}
+      <div className="flex justify-end mt-3 text-sm text-gray-600 text-right">
+        {/* 💡 آیکون در سمت راست (mr-2) */}
+        <FaMapMarkerAlt className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5 mr-2" /> 
+        <p className="mr-1 leading-relaxed">
+          {location.address}
+        </p>
       </div>
-    </li>
+
+      {/* دکمه مسیریابی */}
+      <div className="mt-4 flex justify-end">
+        <a 
+          href={location.url} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150"
+        >
+          {/* 💡 آیکون سمت چپ متن (mr-1) */}
+          <span className="mr-1">مسیریابی (نشان)</span>
+          {/* 💡 تغییر transform برای آیکون جهت */}
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
+          </svg>
+        </a>
+      </div>
+    </div>
   );
 };
 

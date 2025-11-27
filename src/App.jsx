@@ -1,29 +1,51 @@
 // src/App.jsx
 
-import React from 'react';
-import LocationList from '../src/components/LocationList';
-import Header from '../src/components/Header';
-import Footer from '../src/components/Footer';
-import Intro from '../src/components/Intro';
+import React, { useState } from 'react';
+import { CITIES, CITY_KEYS } from './js/location.js';
+import Header from './components/Header';
+import CitySwitch from './components/CitySwitch';
+import LocationList from './components/LocationList';
+import LiveSessionTracker from './components/LiveSessionTracker'; // 💡 ایمپورت جدید
 
 function App() {
+  // زاهدان به عنوان شهر پیش فرض انتخاب شده است
+  const [currentCityKey, setCurrentCityKey] = useState(CITY_KEYS[0]); 
+  const currentCityData = CITIES[currentCityKey];
+
+  const handleCityChange = (cityKey) => {
+    setCurrentCityKey(cityKey);
+  };
+
   return (
-    <div className={`min-h-screen bg-gray-50 text-gray-900 font-vazir relative overflow-hidden`}>
-      {/* پترن متحرک کم‌رنگ */}
-      <div 
-        className="absolute inset-0 bg-repeat opacity-5 pointer-events-none" 
-        style={{ backgroundImage: `url('/pattern.svg')`, backgroundSize: '200px', animation: 'pattern-slow' }}
-      ></div>
-      
-      <Intro /> 
-      <Header />
-      
-      <main className="relative z-10 p-4 md:p-8"> 
-        <LocationList />
+    <div className="min-h-screen bg-gray-50 font-vazir">
+      {/* هدر */}
+      <Header 
+        currentCityKey={currentCityKey} 
+        cities={CITIES} 
+        onCityChange={handleCityChange} 
+      />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        {/* کامپوننت سوییچ شهر */}
+        <CitySwitch 
+          currentCityKey={currentCityKey} 
+          cities={CITIES} 
+          onCityChange={handleCityChange} 
+        />
+        
+        {/* 💡 کامپوننت ردیابی جلسات زنده (جدید) */}
+        <LiveSessionTracker /> 
+
+        {/* لیست مکان‌ها */}
+        <LocationList 
+          locations={currentCityData.locations} 
+          cityName={currentCityData.name} 
+        />
+        
       </main>
-      
-      <Footer />
     </div>
   );
 }
+
 export default App;

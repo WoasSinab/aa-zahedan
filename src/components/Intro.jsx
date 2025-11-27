@@ -51,7 +51,7 @@ const Intro = () => {
         
         {/* متن "جلسات زاهدان" با انیمیشن Fade In و Slide Up */}
         <p className="mt-8 text-gray-800 text-3xl font-bold animate-fade-slide-in-intro">
-          جلسات زاهدان
+          شورای ناحیه ۱۱ ایران
         </p>
       </div>
     </div>
